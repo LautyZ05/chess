@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List; //imported following video
 import java.util.Objects;
@@ -53,10 +54,49 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+    private int[][] diagonol_moves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+    private int[][] straight_moves = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+
+    private Boolean onBoard(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+    }
+
+    private List<ChessMove> sliding_moves(ChessBoard board, ChessPosition myPosition, int[][] dirs) {
+        List<ChessMove> moves = new ArrayList<>();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
+
+        for (int[] dir : dirs) {
+            int row = startRow + dir[0];
+            int col = startCol + dir[1];
+
+            while (onBoard(row, col)) {
+                ChessPosition target = new ChessPosition(row, col);
+                ChessPiece occupant = board.getPiece(target);
+
+                if (occupant == null) {
+                    moves.add(new ChessMove(myPosition, target, null));
+                }
+                else {
+                    if (occupant.getTeamColor() != this.pieceColor) {
+                        moves.add(new ChessMove(myPosition, target, null));
+                    }
+                    break;
+                }
+                row += dir[0];
+                col += dir[1];
+            }
+        }
+        return moves;
+    }
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
-            return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1, 8), null)); //hard coded for testing
+            return sliding_moves(board, myPosition, diagonol_moves);
+        }
+        if (piece.getPieceType() == PieceType.ROOK) {
+            return sliding_moves(board, myPosition, straight_moves);
         }
         return List.of();
     }
