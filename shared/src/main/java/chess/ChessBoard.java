@@ -93,8 +93,23 @@ public class ChessBoard {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return 71 * Arrays.deepHashCode(board);
+    }
+
+    @Override
     public String toString() {
-        String result = "";
+        String result = "\n";
 
         for (int row = 8; row >= 1; row--) {
             for (int col = 1; col <= 8; col ++) {
