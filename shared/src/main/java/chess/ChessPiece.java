@@ -56,6 +56,54 @@ public class ChessPiece {
      */
     private int[][] diagonol_moves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
     private int[][] straight_moves = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+    private int[][] knight_moves = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {1,-2}, {-1,2}, {-1,-2}};
+
+    private void addPawnMoves(List<ChessMove> moves, ChessPosition start, ChessPosition end, int promotionRow) {
+        if (end.getRow() == promotionRow) {
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+        }
+        else {
+            moves.add(new ChessMove(start, end, null));
+        }
+    }
+
+    private List<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
+        int direction = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
+
+        List<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        int oneStepRow = row + direction;
+        if (onBoard(oneStepRow, col) && board.getPiece(new ChessPosition(oneStepRow, col)) == null) {
+            addPawnMoves(moves, myPosition, new ChessPosition(oneStepRow, col), promotionRow);
+
+            int twoStepRow = row + 2 * direction;
+            if (row == startRow && board.getPiece(new ChessPosition(twoStepRow, col)) == null) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(twoStepRow, col), null));
+            }
+        }
+
+        for (int change : new int[]{-1, 1}) {
+            int captureCol = col + change;
+
+            if (onBoard(oneStepRow, captureCol)) {
+                ChessPosition target = new ChessPosition(oneStepRow, captureCol);
+                ChessPiece occupant = board.getPiece(target);
+
+                if (occupant != null && occupant.getTeamColor() != this.pieceColor) {
+                    addPawnMoves(moves, myPosition, target, promotionRow);
+                }
+            }
+        }
+
+        return moves;
+    }
 
     private Boolean onBoard(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
@@ -90,6 +138,27 @@ public class ChessPiece {
         return moves;
     }
 
+    private List<ChessMove> stepping_moves(ChessBoard board, ChessPosition myPosition, int [][] offsets) {
+        List<ChessMove> moves = new ArrayList<>();
+        int startRow = myPosition.getRow();
+        int startCol = myPosition.getColumn();
+
+        for (int[] offset : offsets) {
+            int row = startRow + offset[0];
+            int col = startCol + offset[1];
+
+            if (onBoard(row, col)) {
+                ChessPosition target = new ChessPosition(row, col);
+                ChessPiece occupant = board.getPiece(target);
+
+                if (occupant == null || occupant.getTeamColor() != this.pieceColor) {
+                    moves.add(new ChessMove(myPosition, target, null));
+                }
+            }
+        }
+        return moves;
+    }
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
@@ -97,6 +166,22 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.ROOK) {
             return sliding_moves(board, myPosition, straight_moves);
+        }
+        if (piece.getPieceType() == PieceType.QUEEN) {
+            List<ChessMove> queenMoves = new ArrayList<>(sliding_moves(board, myPosition, diagonol_moves));
+            queenMoves.addAll(sliding_moves(board, myPosition, straight_moves));
+            return queenMoves;
+        }
+        if (piece.getPieceType() == PieceType.KING) {
+            List<ChessMove> kingMoves = new ArrayList<>(stepping_moves(board, myPosition, diagonol_moves));
+            kingMoves.addAll(stepping_moves(board, myPosition, straight_moves));
+            return kingMoves;
+        }
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            return stepping_moves(board, myPosition, knight_moves);
+        }
+        if (piece.getPieceType() == PieceType.PAWN) {
+            return pawnMoves(board, myPosition);
         }
         return List.of();
     }
