@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -52,8 +54,56 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null){
+            return null;
+        }
+
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+        List<ChessMove> legalMoves = new ArrayList<>();
+
+        for (ChessMove move: possibleMoves){
+            ChessBoard testBoard = copyBoard(board);
+            applyMoveToBoard(move, testBoard);
+
+            ChessBoard originalBoard = board;
+            board = testBoard;
+
+            boolean leavesKingInCheck = isInCheck(piece.getTeamColor());
+            board = originalBoard;
+
+            if (!leavesKingInCheck){
+                legalMoves.add(move);
+            }
+        }
+        return legalMoves;
     }
+
+    private ChessBoard copyBoard(ChessBoard source){
+        ChessBoard copy = new ChessBoard();
+
+        for (int row = 1; row <= 8; row++){
+            for (int col = 1; col <= 8; col++){
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = source.getPiece(position);
+
+                if (piece != null){
+                    copy.addPiece(position, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
+                }
+            }
+        }
+        return copy;
+    }
+
+    private void applyMoveToBoard(ChessMove move, ChessBoard targetBoard) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece movingPiece = targetBoard.getPiece(start);
+
+        targetBoard.addPiece(end, movingPiece);
+        targetBoard.addPiece(start, null);
+    }
+
 
     /**
      * Makes a move in the chess game
