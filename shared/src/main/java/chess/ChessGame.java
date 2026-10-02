@@ -71,8 +71,49 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+    private ChessPosition findKing(TeamColor teamColor) {
+        for (int row = 1; row <= 8; row ++) {
+            for (int col = 1; col <= 8; col ++) {
+                ChessPiece occupant = board.getPiece(new ChessPosition(row, col));
+                if (occupant == null) {
+                    continue;
+                }
+                if (occupant.getPieceType() == ChessPiece.PieceType.KING){
+                    if (occupant.getTeamColor() == teamColor) {
+                        return new ChessPosition(row, col);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        TeamColor opponent = (teamColor == TeamColor.WHITE)? TeamColor.BLACK : TeamColor.WHITE;
+        ChessPosition kingPosition = findKing(teamColor);
+
+        if (kingPosition == null) {
+            return false;
+        }
+
+        for (int row = 1; row <= 8; row ++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece occupant = board.getPiece(position);
+
+                if (occupant == null || occupant.getTeamColor() != opponent){
+                    continue;
+                }
+
+                Collection<ChessMove> moves = occupant.pieceMoves(board, position);
+                for (ChessMove move: moves) {
+                    if (move.getEndPosition().equals(kingPosition)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -126,6 +167,6 @@ public class ChessGame {
 
     @Override
     public int hashCode() {
-        return 71* Objects.hash(board, teamTurn);
+        return 71 * Objects.hash(board, teamTurn);
     }
 }
