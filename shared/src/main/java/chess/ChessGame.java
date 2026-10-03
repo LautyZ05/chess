@@ -100,7 +100,12 @@ public class ChessGame {
         ChessPosition end = move.getEndPosition();
         ChessPiece movingPiece = targetBoard.getPiece(start);
 
-        targetBoard.addPiece(end, movingPiece);
+        ChessPiece pieceToPlace = movingPiece;
+        if (move.getPromotionPiece() != null){
+            pieceToPlace = new ChessPiece(movingPiece.getTeamColor(), move.getPromotionPiece());
+        }
+
+        targetBoard.addPiece(end, pieceToPlace);
         targetBoard.addPiece(start, null);
     }
 
@@ -112,7 +117,24 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPiece piece = board.getPiece(start);
+
+        if (piece == null){
+            throw new InvalidMoveException("No piece at start position");
+        }
+        if (piece.getTeamColor() != teamTurn){
+            throw new InvalidMoveException("It is not that team's turn");
+        }
+
+        Collection<ChessMove> legalMoves = validMoves(start);
+
+        if (legalMoves == null || !legalMoves.contains(move)){
+            throw new InvalidMoveException("Move is not legal");
+        }
+
+        applyMoveToBoard(move, board);
+        teamTurn = (teamTurn == TeamColor.WHITE)? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
