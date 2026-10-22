@@ -1,13 +1,19 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.*;
 import io.javalin.*;
+import model.UserData;
+import service.ServiceException;
+import service.UserService;
 
 import java.util.Map;
 
 public class Server {
-
     private final Javalin javalin;
+    private final UserDao userDAO = new MemoryUserDao();
+    private final AuthDao authDAO = new MemoryAuthDao();
+    private final UserService userService = new UserService(userDAO, authDAO);
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -15,13 +21,27 @@ public class Server {
         javalin.delete("/db", ctx -> ctx.result("{}")); //just to move onto, not actually clearing stuff
 
         // Register your endpoints and exception handlers here.
-        javalin.post("/user", Server::register);
+        javalin.post("/user", this::register);
 
+        javalin.exception(ServiceException.class, this::serviceExceptionHandler);
+
+        javalin.exception(Exception.class, this::unexpectedExceptionHandler);
     }
 
-    private static void register(io.javalin.http.Context ctx) {
-        var result = Map.of("username", "", "authToken", "");
+    private void register(io.javalin.http.Context ctx) throws ServiceException, DataAccessException {
+        var req = new Gson().fromJson(ctx.body(), UserData.class);
+        var result = userService.register(req);
         ctx.result(new Gson().toJson(result));
+    }
+
+    private void serviceExceptionHandler(ServiceException ex, io.javalin.http.Context ctx) {
+        ctx.status(ex.status());
+        ctx.result(new Gson().toJson(Map.of("message", ex.getMessage())));
+    }
+
+    private void unexpectedExceptionHandler(Exception ex, io.javalin.http.Context ctx) {
+        ctx.status(500);
+        ctx.result(new Gson().toJson(Map.of("message", "Error: " + ex.getMessage())));
     }
 
 
