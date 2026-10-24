@@ -23,6 +23,8 @@ public class Server {
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
 
+        javalin.post("/session", this::login);
+
         javalin.exception(ServiceException.class, this::serviceExceptionHandler);
 
         javalin.exception(Exception.class, this::unexpectedExceptionHandler);
@@ -32,6 +34,11 @@ public class Server {
         var req = new Gson().fromJson(ctx.body(), UserData.class);
         var result = userService.register(req);
         ctx.result(new Gson().toJson(result));
+    }
+
+    private void login(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
+        var req = new Gson().fromJson(ctx.body(), UserService.LoginRequest.class);
+        ctx.result(new Gson().toJson(userService.login(req)));
     }
 
     private void serviceExceptionHandler(ServiceException ex, io.javalin.http.Context ctx) {
