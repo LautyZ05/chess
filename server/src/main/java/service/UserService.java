@@ -43,4 +43,11 @@ public class UserService {
         auths.createAuth(auth);
         return auth;
     }
+
+    public void logout(String authToken) throws ServiceException, DataAccessException{
+        if (authToken == null || auths.getAuth(authToken) == null){
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        auths.deleteAuth(authToken);
+    }
 }

@@ -25,6 +25,8 @@ public class Server {
 
         javalin.post("/session", this::login);
 
+        javalin.delete("/session", this::logout);
+
         javalin.exception(ServiceException.class, this::serviceExceptionHandler);
 
         javalin.exception(Exception.class, this::unexpectedExceptionHandler);
@@ -39,6 +41,11 @@ public class Server {
     private void login(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
         var req = new Gson().fromJson(ctx.body(), UserService.LoginRequest.class);
         ctx.result(new Gson().toJson(userService.login(req)));
+    }
+
+    private void logout(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
+        userService.logout(ctx.header("authorization"));
+        ctx.result("{}");
     }
 
     private void serviceExceptionHandler(ServiceException ex, io.javalin.http.Context ctx) {
