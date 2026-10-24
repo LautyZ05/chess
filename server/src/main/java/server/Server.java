@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.*;
 import model.UserData;
+import service.ClearService;
 import service.ServiceException;
 import service.UserService;
 
@@ -14,11 +15,12 @@ public class Server {
     private final UserDao userDAO = new MemoryUserDao();
     private final AuthDao authDAO = new MemoryAuthDao();
     private final UserService userService = new UserService(userDAO, authDAO);
+    private final ClearService clearService = new ClearService(userDAO, authDAO);
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        javalin.delete("/db", ctx -> ctx.result("{}")); //just to move onto, not actually clearing stuff
+        javalin.delete("/db", this::clear); //just to move onto, not actually clearing stuff
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
@@ -30,6 +32,11 @@ public class Server {
         javalin.exception(ServiceException.class, this::serviceExceptionHandler);
 
         javalin.exception(Exception.class, this::unexpectedExceptionHandler);
+    }
+
+    private void clear(io.javalin.http.Context ctx) throws DataAccessException{
+        clearService.clear();
+        ctx.result("{}");
     }
 
     private void register(io.javalin.http.Context ctx) throws ServiceException, DataAccessException {
