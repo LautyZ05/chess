@@ -54,9 +54,9 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    private int[][] diagonol_moves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
-    private int[][] straight_moves = {{1,0}, {-1,0}, {0,1}, {0,-1}};
-    private int[][] knight_moves = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {1,-2}, {-1,2}, {-1,-2}};
+    private final int[][] diagonalMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+    private final int[][] straightMoves = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+    private final int[][] knightMoves = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {1,-2}, {-1,2}, {-1,-2}};
 
     private void addPawnMoves(List<ChessMove> moves, ChessPosition start, ChessPosition end, int promotionRow) {
         if (end.getRow() == promotionRow) {
@@ -109,7 +109,7 @@ public class ChessPiece {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
-    private List<ChessMove> sliding_moves(ChessBoard board, ChessPosition myPosition, int[][] dirs) {
+    private List<ChessMove> slidingMoves(ChessBoard board, ChessPosition myPosition, int[][] dirs) {
         List<ChessMove> moves = new ArrayList<>();
         int startRow = myPosition.getRow();
         int startCol = myPosition.getColumn();
@@ -138,7 +138,7 @@ public class ChessPiece {
         return moves;
     }
 
-    private List<ChessMove> stepping_moves(ChessBoard board, ChessPosition myPosition, int [][] offsets) {
+    private List<ChessMove> steppingMoves(ChessBoard board, ChessPosition myPosition, int [][] offsets) {
         List<ChessMove> moves = new ArrayList<>();
         int startRow = myPosition.getRow();
         int startCol = myPosition.getColumn();
@@ -162,23 +162,23 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         if (piece.getPieceType() == PieceType.BISHOP) {
-            return sliding_moves(board, myPosition, diagonol_moves);
+            return slidingMoves(board, myPosition, diagonalMoves);
         }
         if (piece.getPieceType() == PieceType.ROOK) {
-            return sliding_moves(board, myPosition, straight_moves);
+            return slidingMoves(board, myPosition, straightMoves);
         }
         if (piece.getPieceType() == PieceType.QUEEN) {
-            List<ChessMove> queenMoves = new ArrayList<>(sliding_moves(board, myPosition, diagonol_moves));
-            queenMoves.addAll(sliding_moves(board, myPosition, straight_moves));
+            List<ChessMove> queenMoves = new ArrayList<>(slidingMoves(board, myPosition, diagonalMoves));
+            queenMoves.addAll(slidingMoves(board, myPosition, straightMoves));
             return queenMoves;
         }
         if (piece.getPieceType() == PieceType.KING) {
-            List<ChessMove> kingMoves = new ArrayList<>(stepping_moves(board, myPosition, diagonol_moves));
-            kingMoves.addAll(stepping_moves(board, myPosition, straight_moves));
+            List<ChessMove> kingMoves = new ArrayList<>(steppingMoves(board, myPosition, diagonalMoves));
+            kingMoves.addAll(steppingMoves(board, myPosition, straightMoves));
             return kingMoves;
         }
         if (piece.getPieceType() == PieceType.KNIGHT) {
-            return stepping_moves(board, myPosition, knight_moves);
+            return steppingMoves(board, myPosition, knightMoves);
         }
         if (piece.getPieceType() == PieceType.PAWN) {
             return pawnMoves(board, myPosition);
