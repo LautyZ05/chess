@@ -34,6 +34,8 @@ public class Server {
 
         javalin.post("/game", this::createGame);
 
+        javalin.put("/game", this::joinGame);
+
         javalin.get("/game", this::listGames);
 
         javalin.exception(ServiceException.class, this::serviceExceptionHandler);
@@ -65,6 +67,12 @@ public class Server {
     private void createGame(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
         var req = new Gson().fromJson(ctx.body(), GameService.CreateGameRequest.class);
         ctx.result(new Gson().toJson(gameService.createGame(ctx.header("authorization"), req)));
+    }
+
+    private void joinGame(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
+        var req = new Gson().fromJson(ctx.body(), GameService.JoinGameRequest.class);
+        gameService.joinGame(ctx.header("authorization"), req);
+        ctx.result("{}");
     }
 
     private void listGames(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
