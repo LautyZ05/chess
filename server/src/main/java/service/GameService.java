@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDao;
 import dataaccess.DataAccessException;
 import dataaccess.GameDao;
@@ -14,6 +15,8 @@ public class GameService {
     private GameDao games;
     public record GameSummary(int gameID, String whiteUsername, String blackUsername, String gameName){}
     public record ListGamesResult(Collection<GameSummary> games){}
+    public record CreateGameRequest(String gameName){}
+    public record CreateGameResult(int gameID){}
 
     public GameService(AuthDao auths, GameDao games){
         this.auths = auths;
@@ -35,5 +38,14 @@ public class GameService {
             summaries.add(new GameSummary(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()));
         }
         return new ListGamesResult(summaries);
+    }
+
+    public CreateGameResult createGame(String authToken, CreateGameRequest req) throws ServiceException, DataAccessException{
+        authenticate(authToken);
+        if (req == null || req.gameName() == null){
+            throw new ServiceException(400, "Error: bad request");
+        }
+        GameData created = games.createGame(new GameData(0, null, null, req.gameName(), new ChessGame()));
+        return new CreateGameResult(created.gameID());
     }
 }

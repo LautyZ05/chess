@@ -23,7 +23,7 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        javalin.delete("/db", this::clear); //just to move onto, not actually clearing stuff
+        javalin.delete("/db", this::clear);
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
@@ -31,6 +31,8 @@ public class Server {
         javalin.post("/session", this::login);
 
         javalin.delete("/session", this::logout);
+
+        javalin.post("/game", this::createGame);
 
         javalin.get("/game", this::listGames);
 
@@ -58,6 +60,11 @@ public class Server {
     private void logout(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
         userService.logout(ctx.header("authorization"));
         ctx.result("{}");
+    }
+
+    private void createGame(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
+        var req = new Gson().fromJson(ctx.body(), GameService.CreateGameRequest.class);
+        ctx.result(new Gson().toJson(gameService.createGame(ctx.header("authorization"), req)));
     }
 
     private void listGames(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
