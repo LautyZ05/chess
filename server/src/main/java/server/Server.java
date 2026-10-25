@@ -5,6 +5,7 @@ import dataaccess.*;
 import io.javalin.*;
 import model.UserData;
 import service.ClearService;
+import service.GameService;
 import service.ServiceException;
 import service.UserService;
 
@@ -14,8 +15,10 @@ public class Server {
     private final Javalin javalin;
     private final UserDao userDAO = new MemoryUserDao();
     private final AuthDao authDAO = new MemoryAuthDao();
+    private final GameDao gameDAO = new MemoryGameDao();
     private final UserService userService = new UserService(userDAO, authDAO);
     private final ClearService clearService = new ClearService(userDAO, authDAO);
+    private final GameService gameService = new GameService(authDAO, gameDAO);
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -28,6 +31,8 @@ public class Server {
         javalin.post("/session", this::login);
 
         javalin.delete("/session", this::logout);
+
+        javalin.get("/game", this::listGames);
 
         javalin.exception(ServiceException.class, this::serviceExceptionHandler);
 
@@ -53,6 +58,10 @@ public class Server {
     private void logout(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
         userService.logout(ctx.header("authorization"));
         ctx.result("{}");
+    }
+
+    private void listGames(io.javalin.http.Context ctx) throws ServiceException, DataAccessException{
+        ctx.result(new Gson().toJson(gameService.listGames(ctx.header("authorization"))));
     }
 
     private void serviceExceptionHandler(ServiceException ex, io.javalin.http.Context ctx) {
