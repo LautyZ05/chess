@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameService {
-    private AuthDao auths;
-    private GameDao games;
+    private final AuthDao auths;
+    private final GameDao games;
     public record GameSummary(int gameID, String whiteUsername, String blackUsername, String gameName){}
     public record ListGamesResult(Collection<GameSummary> games){}
     public record CreateGameRequest(String gameName){}

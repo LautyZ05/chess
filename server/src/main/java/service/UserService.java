@@ -8,8 +8,8 @@ import model.*;
 import java.util.UUID;
 
 public class UserService {
-    private UserDao users;
-    private AuthDao auths;
+    private final UserDao users;
+    private final AuthDao auths;
     public record LoginRequest(String username, String password){}
 
     public UserService(UserDao users, AuthDao auths){

@@ -3,9 +3,9 @@ package service;
 import dataaccess.*;
 
 public class ClearService{
-    private UserDao users;
-    private AuthDao auths;
-    private GameDao games;
+    private final UserDao users;
+    private final AuthDao auths;
+    private final GameDao games;
 
     public ClearService(UserDao users, AuthDao auths, GameDao games){
         this.users = users;
