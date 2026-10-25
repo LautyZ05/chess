@@ -17,7 +17,7 @@ public class Server {
     private final AuthDao authDAO = new MemoryAuthDao();
     private final GameDao gameDAO = new MemoryGameDao();
     private final UserService userService = new UserService(userDAO, authDAO);
-    private final ClearService clearService = new ClearService(userDAO, authDAO);
+    private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
     private final GameService gameService = new GameService(authDAO, gameDAO);
 
     public Server() {
