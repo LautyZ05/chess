@@ -64,11 +64,15 @@ public class GameService {
         String black = game.blackUsername();
 
         if (req.playerColor().equals("WHITE")){
-            if (white != null) throw new ServiceException(403, "Error: already taken");
+            if (white != null) {
+                throw new ServiceException(403, "Error: already taken");
+            }
             white = auth.username();
         }
         else if (req.playerColor().equals("BLACK")){
-            if (black != null) throw new ServiceException(403, "Error: already taken");
+            if (black != null) {
+                throw new ServiceException(403, "Error: already taken");
+            }
             black = auth.username();
         }
         else{
