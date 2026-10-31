@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import dataaccess.sql.SQLUserDao;
 import io.javalin.*;
 import model.UserData;
 import service.ClearService;
@@ -13,14 +14,26 @@ import java.util.Map;
 
 public class Server {
     private final Javalin javalin;
-    private final UserDao userDAO = new MemoryUserDao();
-    private final AuthDao authDAO = new MemoryAuthDao();
-    private final GameDao gameDAO = new MemoryGameDao();
-    private final UserService userService = new UserService(userDAO, authDAO);
-    private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
-    private final GameService gameService = new GameService(authDAO, gameDAO);
+    private final UserDao userDAO;
+    private final AuthDao authDAO;
+    private final GameDao gameDAO;
+    private final UserService userService;
+    private final ClearService clearService;
+    private final GameService gameService;
 
     public Server() {
+        try{
+            userDAO = new SQLUserDao();
+        }
+        catch (DataAccessException e){
+            throw new RuntimeException("Unable to start server: " + e.getMessage());
+        }
+        authDAO = new MemoryAuthDao();
+        gameDAO = new MemoryGameDao();
+        userService = new UserService(userDAO, authDAO);
+        clearService = new ClearService(userDAO, authDAO, gameDAO);
+        gameService = new GameService(authDAO, gameDAO);
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         javalin.delete("/db", this::clear);
