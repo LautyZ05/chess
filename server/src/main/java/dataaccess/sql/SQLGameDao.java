@@ -1,5 +1,6 @@
 package dataaccess.sql;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import java.sql.*;
@@ -38,21 +39,40 @@ public class SQLGameDao implements GameDao{
         return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
     }
 
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) throws DataAccessException{
+        try (var conn = DatabaseManager.getConnection()){
+            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?")){
+                preparedStatement.setInt(1, gameID);
+                try (var resSet = preparedStatement.executeQuery()){
+                    if (resSet.next()){
+                        return readGame(resSet);
+                    }
+                }
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("unable to read data: " + e.getMessage());
+        }
         return null;
     }
 
-    public Collection<GameData> listGames() throws DataAccessException {
+    public Collection<GameData> listGames() throws DataAccessException{
         return List.of();
     }
 
-    public void updateGame(GameData game) throws DataAccessException {
+    public void updateGame(GameData game) throws DataAccessException{
 
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() throws DataAccessException{
         updateDatabase("TRUNCATE game");
     }
+
+    private GameData readGame(ResultSet resSet) throws SQLException{
+        ChessGame chessGame = new Gson().fromJson(resSet.getString("game"), ChessGame.class);
+        return new GameData(resSet.getInt("gameID"), resSet.getString("whiteUsername"), resSet.getString("blackUsername"), resSet.getString("gameName"), chessGame);
+    }
+
 
     private int updateDatabase(String statement, Object... params) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()){

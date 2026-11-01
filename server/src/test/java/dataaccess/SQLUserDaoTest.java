@@ -18,7 +18,7 @@ class SQLUserDaoTest{
     @Test
     public void userTableExists() throws Exception{
         new SQLUserDao();
-        try (var conn = DatabaseManager.getConnection();){
+        try (var conn = DatabaseManager.getConnection()){
             try (var ps = conn.prepareStatement("SHOW TABLES LIKE 'user'")){
                 try (var rs = ps.executeQuery()){
                     assertTrue(rs.next());
