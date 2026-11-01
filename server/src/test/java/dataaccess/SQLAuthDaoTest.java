@@ -10,7 +10,7 @@ class SQLAuthDaoTest{
     private SQLAuthDao testDao;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() throws Exception{
         testDao = new SQLAuthDao();
         testDao.clear();
     }

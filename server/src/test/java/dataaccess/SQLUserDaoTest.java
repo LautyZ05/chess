@@ -10,7 +10,7 @@ class SQLUserDaoTest{
     private SQLUserDao testDao;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() throws Exception{
         testDao = new SQLUserDao();
         testDao.clear();
     }

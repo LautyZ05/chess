@@ -56,19 +56,19 @@ public class SQLUserDao implements UserDao{
         try (Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement prepState = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)){
                 for (int i = 0; i < params.length; i++){
-                    if (params[i] instanceof String s) {
+                    if (params[i] instanceof String s){
                         prepState.setString(i + 1, s);
                     }
                     else if (params[i] instanceof Integer in){
                         prepState.setInt(i + 1, in);
                     }
-                    else if (params[i] == null) {
+                    else if (params[i] == null){
                         prepState.setNull(i + 1, Types.NULL);
                     }
                 }
                 prepState.executeUpdate();
                 try (ResultSet resSet = prepState.getGeneratedKeys()){
-                    if (resSet.next()) {
+                    if (resSet.next()){
                         resSet.getInt(1);
                     }
                 }

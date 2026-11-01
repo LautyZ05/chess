@@ -11,7 +11,7 @@ class SQLGameDaoTest {
     private SQLGameDao testDao;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() throws Exception{
         testDao = new SQLGameDao();
         testDao.clear();
     }
