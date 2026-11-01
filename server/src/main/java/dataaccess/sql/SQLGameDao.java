@@ -36,13 +36,15 @@ public class SQLGameDao implements GameDao{
 
     public GameData createGame(GameData game) throws DataAccessException{
         String json = new Gson().toJson(game.game());
-        int id = updateDatabase( "INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)", game.whiteUsername(), game.blackUsername(), game.gameName(), json);
+        int id = updateDatabase( "INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)",
+                game.whiteUsername(), game.blackUsername(), game.gameName(), json);
         return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
     }
 
     public GameData getGame(int gameID) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()){
-            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?")){
+            try (var preparedStatement = conn.prepareStatement(
+                    "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?")){
                 preparedStatement.setInt(1, gameID);
                 try (var resSet = preparedStatement.executeQuery()){
                     if (resSet.next()){
@@ -79,7 +81,8 @@ public class SQLGameDao implements GameDao{
             throw new DataAccessException("game does not exist");
         }
         String json = new Gson().toJson(game.game());
-        updateDatabase("UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?", game.whiteUsername(), game.blackUsername(), game.gameName(), json, game.gameID());
+        updateDatabase("UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?",
+                game.whiteUsername(), game.blackUsername(), game.gameName(), json, game.gameID());
     }
 
     public void clear() throws DataAccessException{
@@ -88,7 +91,11 @@ public class SQLGameDao implements GameDao{
 
     private GameData readGame(ResultSet resSet) throws SQLException{
         ChessGame chessGame = new Gson().fromJson(resSet.getString("game"), ChessGame.class);
-        return new GameData(resSet.getInt("gameID"), resSet.getString("whiteUsername"), resSet.getString("blackUsername"), resSet.getString("gameName"), chessGame);
+        return new GameData(
+                resSet.getInt("gameID"),
+                resSet.getString("whiteUsername"),
+                resSet.getString("blackUsername"),
+                resSet.getString("gameName"), chessGame);
     }
 
 
