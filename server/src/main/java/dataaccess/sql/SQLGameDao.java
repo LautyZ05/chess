@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import model.*;
@@ -57,11 +58,28 @@ public class SQLGameDao implements GameDao{
     }
 
     public Collection<GameData> listGames() throws DataAccessException{
-        return List.of();
+        var games = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()){
+            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game")){
+                try (var resSet = preparedStatement.executeQuery()){
+                    while (resSet.next()){
+                        games.add(readGame(resSet));
+                    }
+                }
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("unable to read data: " + e.getMessage());
+        }
+        return games;
     }
 
     public void updateGame(GameData game) throws DataAccessException{
-
+        if (getGame(game.gameID()) == null){
+            throw new DataAccessException("game does not exist");
+        }
+        String json = new Gson().toJson(game.game());
+        updateDatabase("UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?", game.whiteUsername(), game.blackUsername(), game.gameName(), json, game.gameID());
     }
 
     public void clear() throws DataAccessException{

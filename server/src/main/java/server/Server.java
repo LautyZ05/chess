@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import dataaccess.sql.SQLAuthDao;
+import dataaccess.sql.SQLGameDao;
 import dataaccess.sql.SQLUserDao;
 import io.javalin.*;
 import model.UserData;
@@ -26,11 +27,11 @@ public class Server {
         try{
             userDAO = new SQLUserDao();
             authDAO = new SQLAuthDao();
+            gameDAO = new SQLGameDao();
         }
         catch (DataAccessException e){
             throw new RuntimeException("Unable to start server: " + e.getMessage());
         }
-        gameDAO = new MemoryGameDao();
         userService = new UserService(userDAO, authDAO);
         clearService = new ClearService(userDAO, authDAO, gameDAO);
         gameService = new GameService(authDAO, gameDAO);

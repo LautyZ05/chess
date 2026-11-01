@@ -35,11 +35,34 @@ class SQLGameDaoTest {
 
         assertNotNull(loaded);
         assertEquals(created.gameID(), loaded.gameID());
-        assertEquals("game1", loaded.gameName());
+        assertEquals("testGame1", loaded.gameName());
         assertNull(loaded.whiteUsername());
         assertNull(loaded.blackUsername());
         assertNotNull(loaded.game());
         assertEquals(new ChessGame(), loaded.game());
     }
 
+    @Test
+    public void listGamesTest() throws Exception{
+        testDao.createGame(new GameData(0, null, null, "testGame1", new ChessGame()));
+        testDao.createGame(new GameData(0, null, null, "testGame2", new ChessGame()));
+        assertEquals(2, testDao.listGames().size());
+    }
+
+    @Test
+    public void updateGameTest() throws Exception{
+        var created = testDao.createGame(new GameData(0, null, null, "testGame1", new ChessGame()));
+        testDao.updateGame(new GameData(created.gameID(), "whiteTest", "blackTest", "testGame1", created.game()));
+
+        var loaded = testDao.getGame(created.gameID());
+        assertEquals("whiteTest", loaded.whiteUsername());
+        assertEquals("blackTest", loaded.blackUsername());
+    }
+
+    @Test
+    public void clearRemovesGames() throws Exception{
+        testDao.createGame(new GameData(0, null, null, "testGame1", new ChessGame()));
+        testDao.clear();
+        assertTrue(testDao.listGames().isEmpty());
+    }
 }
