@@ -49,7 +49,7 @@ public class SQLUserDao implements UserDao{
         return null;
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() throws DataAccessException{
         updateDatabase("TRUNCATE user");
     }
 }

@@ -20,7 +20,7 @@ public class SQLUpdateDatabase {
                     }
                 }
                 prepState.executeUpdate();
-                try (ResultSet resSet = prepState.getGeneratedKeys()) {
+                try (ResultSet resSet = prepState.getGeneratedKeys()){
                     return resSet.next() ? resSet.getInt(1) : 0;
                 }
             }
