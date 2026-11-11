@@ -22,6 +22,10 @@ public class ServerFacade {
         return new Gson().fromJson(response.body(), AuthData.class);
     }
 
+    public void clear() throws ResponseException{
+        HttpResponse<String> response = sendRequest("DELETE", "/db", null);
+    }
+
     private HttpResponse<String> sendRequest(String action, String path, String body) throws ResponseException{
         var request = HttpRequest.newBuilder(URI.create(URL + path))
                 .method(action, requestBody(body))

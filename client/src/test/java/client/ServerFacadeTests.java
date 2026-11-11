@@ -3,7 +3,7 @@ package client;
 import org.junit.jupiter.api.*;
 import server.Server;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -18,6 +18,12 @@ public class ServerFacadeTests {
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade("http://localhost:" + port);
     }
+
+    @BeforeEach
+    void clearDatabase() throws Exception{
+        facade.clear();
+    }
+
 
     @AfterAll
     static void stopServer() {
@@ -34,6 +40,14 @@ public class ServerFacadeTests {
     public void registerTest() throws Exception{
         var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
         assertTrue(authData.authToken().length() > 10);
+    }
+
+    @Test void clearTest() throws Exception{
+        facade.register("testPlayer1", "testPassword", "p1@test.com");
+        facade.clear();
+
+        var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        assertNotNull(authData.authToken());
     }
 
 }
