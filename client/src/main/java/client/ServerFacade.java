@@ -7,12 +7,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
     String URL;
     HttpClient client = HttpClient.newHttpClient();
     private record CreateGameResult(int gameID) {}
+    private record ListGamesResult(List<GameData> games) {}
 
     public ServerFacade(String url){
         URL = url;
@@ -42,11 +44,17 @@ public class ServerFacade {
         checkResponse(response);
     }
 
-    public int createGame(String authToken, String gameName) throws ResponseException {
+    public int createGame(String authToken, String gameName) throws ResponseException{
         String body = new Gson().toJson(Map.of("gameName", gameName));
         HttpResponse<String> response = sendRequest("POST", "/game", body, authToken);
         checkResponse(response);
         return new Gson().fromJson(response.body(), CreateGameResult.class).gameID();
+    }
+
+    public List<GameData> listGames(String authToken) throws ResponseException{
+        HttpResponse<String> response = sendRequest("GET", "/game", null, authToken);
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), ListGamesResult.class).games();
     }
 
     private HttpResponse<String> sendRequest(String action, String path, String body, String authToken) throws ResponseException{

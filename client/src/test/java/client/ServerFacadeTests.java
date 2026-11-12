@@ -75,4 +75,15 @@ public class ServerFacadeTests {
         int gameID = facade.createGame(authData.authToken(), "testGame1");
         assertTrue(gameID > 0);
     }
+
+    @Test
+    public void listGamesTest() throws Exception{
+        var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        facade.createGame(authData.authToken(), "testGame1");
+        facade.createGame(authData.authToken(), "testGame2");
+
+        var games = facade.listGames(authData.authToken());
+        assertEquals(2, games.size());
+        assertEquals("testGame1", games.get(0).gameName());
+    }
 }
