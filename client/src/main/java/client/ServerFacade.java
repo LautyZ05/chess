@@ -19,11 +19,13 @@ public class ServerFacade {
     public AuthData register(String username, String password, String email) throws ResponseException{
         String body = new Gson().toJson(new UserData(username, password, email));
         HttpResponse<String> response = sendRequest("POST", "/user", body);
+        checkResponse(response);
         return new Gson().fromJson(response.body(), AuthData.class);
     }
 
     public void clear() throws ResponseException{
         HttpResponse<String> response = sendRequest("DELETE", "/db", null);
+        checkResponse(response);
     }
 
     private HttpResponse<String> sendRequest(String action, String path, String body) throws ResponseException{
@@ -44,6 +46,22 @@ public class ServerFacade {
         }
         else{
             return HttpRequest.BodyPublishers.noBody();
+        }
+    }
+
+    private void checkResponse(HttpResponse<String> response) throws ResponseException{
+        int status = response.statusCode();
+        if (status / 100 != 2){
+            throw new ResponseException(status, errorMessage(response.body()));
+        }
+    }
+
+    private String errorMessage(String body){
+        try {
+            return new Gson().fromJson(body, java.util.Map.class).get("message").toString();
+        }
+        catch (Exception e){
+            return "Something went wrong";
         }
     }
 }

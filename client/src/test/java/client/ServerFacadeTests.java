@@ -42,6 +42,12 @@ public class ServerFacadeTests {
         assertTrue(authData.authToken().length() > 10);
     }
 
+    @Test
+    public void doubleRegisterFailTest() throws Exception{
+        facade.register("testPlayer1", "testPassword", "p1@test.com");
+        assertThrows(ResponseException.class, () -> facade.register("testPlayer1", "testPassword", "p1@test.com"));
+    }
+
     @Test void clearTest() throws Exception{
         facade.register("testPlayer1", "testPassword", "p1@test.com");
         facade.clear();
