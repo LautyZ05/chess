@@ -19,29 +19,39 @@ public class ServerFacade {
 
     public AuthData register(String username, String password, String email) throws ResponseException{
         String body = new Gson().toJson(new UserData(username, password, email));
-        HttpResponse<String> response = sendRequest("POST", "/user", body);
+        HttpResponse<String> response = sendRequest("POST", "/user", body, null);
         checkResponse(response);
         return new Gson().fromJson(response.body(), AuthData.class);
     }
 
     public void clear() throws ResponseException{
-        HttpResponse<String> response = sendRequest("DELETE", "/db", null);
+        HttpResponse<String> response = sendRequest("DELETE", "/db", null, null);
         checkResponse(response);
     }
 
     public AuthData login(String username, String password) throws ResponseException{
         String body = new Gson().toJson(Map.of("username", username, "password", password));
-        HttpResponse<String> response = sendRequest("POST", "/session", body);
+        HttpResponse<String> response = sendRequest("POST", "/session", body, null);
         checkResponse(response);
         return new Gson().fromJson(response.body(), AuthData.class);
     }
 
-    private HttpResponse<String> sendRequest(String action, String path, String body) throws ResponseException{
+    public void logout(String authToken) throws ResponseException {
+        HttpResponse<String> response = sendRequest("DELETE", "/session", null, authToken);
+        checkResponse(response);
+    }
+
+    private HttpResponse<String> sendRequest(String action, String path, String body, String authToken) throws ResponseException{
         var request = HttpRequest.newBuilder(URI.create(URL + path))
-                .method(action, requestBody(body))
-                .build();
+                .method(action, requestBody(body));
+        if (body != null) {
+            request.header("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.header("authorization", authToken);
+        }
         try{
-            return client.send(request, HttpResponse.BodyHandlers.ofString());
+            return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
         }
         catch (Exception e){
             throw new ResponseException(500, "Unable to reach the server");

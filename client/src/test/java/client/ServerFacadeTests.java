@@ -63,4 +63,10 @@ public class ServerFacadeTests {
         assertTrue(authData.authToken().length() > 10);
     }
 
+    @Test
+    public void logoutTest() throws Exception{
+        var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        assertDoesNotThrow(() -> facade.logout(authData.authToken()));
+    }
+
 }
