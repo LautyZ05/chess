@@ -69,4 +69,10 @@ public class ServerFacadeTests {
         assertDoesNotThrow(() -> facade.logout(authData.authToken()));
     }
 
+    @Test
+    public void createGameTest() throws Exception{
+        var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        int gameID = facade.createGame(authData.authToken(), "testGame1");
+        assertTrue(gameID > 0);
+    }
 }

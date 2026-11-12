@@ -12,6 +12,7 @@ import java.util.Map;
 public class ServerFacade {
     String URL;
     HttpClient client = HttpClient.newHttpClient();
+    private record CreateGameResult(int gameID) {}
 
     public ServerFacade(String url){
         URL = url;
@@ -39,6 +40,13 @@ public class ServerFacade {
     public void logout(String authToken) throws ResponseException {
         HttpResponse<String> response = sendRequest("DELETE", "/session", null, authToken);
         checkResponse(response);
+    }
+
+    public int createGame(String authToken, String gameName) throws ResponseException {
+        String body = new Gson().toJson(Map.of("gameName", gameName));
+        HttpResponse<String> response = sendRequest("POST", "/game", body, authToken);
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), CreateGameResult.class).gameID();
     }
 
     private HttpResponse<String> sendRequest(String action, String path, String body, String authToken) throws ResponseException{
