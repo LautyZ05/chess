@@ -57,6 +57,12 @@ public class ServerFacade {
         return new Gson().fromJson(response.body(), ListGamesResult.class).games();
     }
 
+    public void joinGame(String authToken, String playerColor, int gameID) throws Exception{
+        String body = new Gson().toJson(Map.of("playerColor", playerColor, "gameID", gameID));
+        HttpResponse<String> response = sendRequest("PUT", "/game", body, authToken);
+        checkResponse(response);
+    }
+
     private HttpResponse<String> sendRequest(String action, String path, String body, String authToken) throws ResponseException{
         var request = HttpRequest.newBuilder(URI.create(URL + path))
                 .method(action, requestBody(body));

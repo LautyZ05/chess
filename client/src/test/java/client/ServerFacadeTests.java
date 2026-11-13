@@ -86,4 +86,24 @@ public class ServerFacadeTests {
         assertEquals(2, games.size());
         assertEquals("testGame1", games.get(0).gameName());
     }
+
+    @Test
+    public void joinGameTest() throws Exception{
+        var authData = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        int gameID = facade.createGame(authData.authToken(), "testGame1");
+        facade.joinGame(authData.authToken(), "WHITE", gameID);
+
+        var game = facade.listGames(authData.authToken()).get(0);
+        assertEquals("testPlayer1", game.whiteUsername());
+        assertNull(game.blackUsername());
+    }
+
+    @Test
+    public void fe() throws Exception{
+        var first = facade.register("testPlayer1", "testPassword", "p1@test.com");
+        var second = facade.register("testPlayer2", "testPassword2", "p2@test.com");
+        int gameID = facade.createGame(first.authToken(), "testGame1");
+        facade.joinGame(first.authToken(), "WHITE", gameID);
+        assertThrows(ResponseException.class, () -> facade.joinGame(second.authToken(), "WHITE", gameID));
+    }
 }
