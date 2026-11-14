@@ -1,5 +1,6 @@
 package client;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ChessClient {
@@ -8,9 +9,10 @@ public class ChessClient {
         LOGGED_IN
     }
     private State state = State.LOGGED_OUT;
+    ServerFacade server;
 
     public ChessClient(String url) throws ResponseException{
-        ServerFacade server = new ServerFacade(url);
+        server = new ServerFacade(url);
     }
 
     public void run(){
@@ -20,10 +22,53 @@ public class ChessClient {
         while (!result.equals("quit")){
             System.out.print("\n[" + state + "] >>> ");
             String userInput = scanned.nextLine();
-            result = userInput;
-            if (result.equals("Help")){
-                System.out.print(help());
+            result = evaluateUserInput(userInput);
+            System.out.print(result);
+        }
+    }
+
+    private String evaluateUserInput(String userInput){
+        String[] inputs = userInput.split(" ");
+        String command = inputs[0].toLowerCase();
+        String[] params = Arrays.copyOfRange(inputs, 1, inputs.length);
+        try{
+            if (command.equals("help")){
+                return help();
             }
+            else if (command.equals("register")){
+                return register(params);
+            }
+            else if (command.equals("login")){
+                return login(params);
+            }
+            else if (command.equals("quit")){
+                return "quit";
+            }
+            else{
+                return "not valid command\n";
+            }
+        }
+        catch (ResponseException e){
+            System.out.print("Something went wrong lol");
+            return command;
+        }
+    }
+
+    private String register(String... params) throws ResponseException{
+        if (params.length == 3){
+            return "Entered register with good params\n";
+        }
+        else {
+            return "Entered register with bad params\n";
+        }
+    }
+
+    private String login(String... params) throws ResponseException{
+        if (params.length == 2){
+            return "Entered login with good params\n";
+        }
+        else {
+            return "Entered login with bad params\n";
         }
     }
 
