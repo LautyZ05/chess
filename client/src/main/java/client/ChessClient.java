@@ -1,7 +1,9 @@
 package client;
 
+import model.AuthData;
 import java.util.Arrays;
 import java.util.Scanner;
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private enum State{
@@ -9,14 +11,15 @@ public class ChessClient {
         LOGGED_IN
     }
     private State state = State.LOGGED_OUT;
-    ServerFacade server;
+    private final ServerFacade server;
+    private String authToken;
 
     public ChessClient(String url) throws ResponseException{
         server = new ServerFacade(url);
     }
 
     public void run(){
-        System.out.println("♕ Welcome to the 240 Chess! Type 'Help' to get started! ♕");
+        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + "♕ Welcome to the 240 Chess! Type " + SET_TEXT_COLOR_GREEN + "'Help'" + SET_TEXT_COLOR_WHITE + " to get started! ♕" + RESET_TEXT_BOLD_FAINT + RESET_TEXT_COLOR);
         Scanner scanned = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")){
@@ -49,26 +52,44 @@ public class ChessClient {
             }
         }
         catch (ResponseException e){
-            System.out.print("Something went wrong lol");
+            System.out.print("Something went wrong, please try again.");
             return command;
         }
     }
 
     private String register(String... params) throws ResponseException{
-        if (params.length == 3){
-            return "Entered register with good params\n";
+        if (params.length != 3){
+            return "Please enter the following: <USERNAME> <PASSWORD> <EMAIL>\n";
         }
-        else {
-            return "Entered register with bad params\n";
+        try{
+            AuthData auth = server.register(params[0], params[1], params[2]);
+            authToken = auth.authToken();
+            state = State.LOGGED_IN;
+            return String.format("You're logged in as %s.\n", auth.username());
+        }
+        catch (ResponseException e){
+            if (e.status() == 403){
+                return "Username is already take, try another.\n";
+            }
+            return "Unable to register user. Please try again.\n";
         }
     }
 
     private String login(String... params) throws ResponseException{
-        if (params.length == 2){
-            return "Entered login with good params\n";
+        if (params.length != 2){
+            return "Please enter the following: <USERNAME> <PASSWORD>\n";
         }
-        else {
-            return "Entered login with bad params\n";
+        try{
+            AuthData auth = server.login(params[0], params[1]);
+            authToken = auth.authToken();
+            state = State.LOGGED_IN;
+            return String.format("You're logged in as %s.\n", auth.username());
+        }
+        catch (ResponseException e){
+            if (e.status() == 401){
+                return "Wrong username or password.\n";
+            }
+            return "Unable to log in user. Please try again.\n";
         }
     }
 
