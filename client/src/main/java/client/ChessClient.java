@@ -26,7 +26,12 @@ public class ChessClient {
             System.out.print("\n[" + state + "] >>> ");
             String userInput = scanned.nextLine();
             result = evaluateUserInput(userInput);
-            System.out.print(result);
+            if (result.equals("quit")){
+                System.out.print("Exiting program. Come again!");
+            }
+            else {
+                System.out.print(result);
+            }
         }
     }
 
@@ -35,25 +40,60 @@ public class ChessClient {
         String command = inputs[0].toLowerCase();
         String[] params = Arrays.copyOfRange(inputs, 1, inputs.length);
         try{
-            if (command.equals("help")){
-                return help();
+            if (state == State.LOGGED_OUT){
+                return evaluateLoggedOut(command, params);
             }
-            else if (command.equals("register")){
-                return register(params);
-            }
-            else if (command.equals("login")){
-                return login(params);
-            }
-            else if (command.equals("quit")){
-                return "quit";
-            }
-            else{
-                return "not valid command\n";
+            else {
+                return evaluateLoggedIn(command, params);
             }
         }
         catch (ResponseException e){
-            System.out.print("Something went wrong, please try again.");
-            return command;
+            return "Something went wrong, please try again.";
+        }
+    }
+
+    private String evaluateLoggedOut(String command, String[] params) throws ResponseException {
+        if (command.equals("help")){
+            return help();
+        }
+        else if (command.equals("register")){
+            return register(params);
+        }
+        else if (command.equals("login")){
+            return login(params);
+        }
+        else if (command.equals("quit")){
+            return "quit";
+        }
+        else{
+            return "not valid command\n";
+        }
+    }
+
+    private String evaluateLoggedIn(String command, String[] params) throws ResponseException{
+        if (command.equals("help")){
+            return help();
+        }
+        else if (command.equals("create")){
+            return "temp create";
+        }
+        else if (command.equals("list")){
+            return "temp list";
+        }
+        else if (command.equals("join")){
+            return "temp join";
+        }
+        else if (command.equals("observe")){
+            return "temp observe";
+        }
+        else if (command.equals("logout")){
+            return logout();
+        }
+        else if (command.equals("quit")){
+            return "quit";
+        }
+        else{
+            return "not valid command\n";
         }
     }
 
@@ -90,6 +130,18 @@ public class ChessClient {
                 return "Wrong username or password.\n";
             }
             return "Unable to log in user. Please try again.\n";
+        }
+    }
+
+    private String logout() throws ResponseException{
+        try{
+            server.logout(authToken);
+            authToken = null;
+            state = State.LOGGED_OUT;
+            return "You have been logged out.\n";
+        }
+        catch (ResponseException e){
+            return "An error has occurred.\n";
         }
     }
 
