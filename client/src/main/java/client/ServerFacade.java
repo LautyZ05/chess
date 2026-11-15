@@ -57,7 +57,7 @@ public class ServerFacade {
         return new Gson().fromJson(response.body(), ListGamesResult.class).games();
     }
 
-    public void joinGame(String authToken, String playerColor, int gameID) throws Exception{
+    public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException{
         String body = new Gson().toJson(Map.of("playerColor", playerColor, "gameID", gameID));
         HttpResponse<String> response = sendRequest("PUT", "/game", body, authToken);
         checkResponse(response);

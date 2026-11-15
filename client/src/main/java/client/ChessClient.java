@@ -86,10 +86,10 @@ public class ChessClient {
             return list();
         }
         else if (command.equals("join")){
-            return "temp join";
+            return join(params);
         }
         else if (command.equals("observe")){
-            return "temp observe";
+            return observe(params);
         }
         else if (command.equals("logout")){
             return logout();
@@ -180,6 +180,55 @@ public class ChessClient {
         catch (ResponseException e){
             return "Unable to list game(s). Please try again.\n";
         }
+    }
+
+    private GameData findGame(String gameNum) throws ResponseException{
+        int number;
+        try{
+            number = Integer.parseInt(gameNum);
+            if (number < 1 || number > games.size()){
+                return null;
+            }
+            return games.get(number-1);
+        }
+        catch (NumberFormatException e){
+            return null;
+        }
+    }
+
+    private String join(String... params) throws ResponseException{
+        if (params.length != 2){
+            return "Please enter the following: <NUMBER> <WHITE|BLACK>\n";
+        }
+        String color = params[1].toUpperCase();
+        if (!color.equals("WHITE") && !color.equals("BLACK")){
+            return "Color must be either 'WHITE' or 'BLACK'.\n";
+        }
+        GameData game = findGame(params[0]);
+        if (game == null){
+            return "That game number doesn't exist. Use 'list' to see games.\n";
+        }
+        try{
+            server.joinGame(authToken, color, game.gameID());
+            return "Joined '" + game.gameName() + "' as '" + color + "'.\n";
+        }
+        catch (ResponseException e){
+            if (e.status == 403){
+                return "That color is already taken.\n";
+            }
+            return "Unable to join game. Please try again.\n";
+        }
+    }
+
+    private String observe(String... params) throws ResponseException{
+        if (params.length != 1){
+            return "Please enter the following: <NUMBER>\n.";
+        }
+        GameData game = findGame(params[0]);
+        if (game == null){
+            return "That game number doesn't exist. Use 'list' to see games.\n";
+        }
+        return "Observing '" + game.gameName() + "'.\n";
     }
 
     private String logout() throws ResponseException{
