@@ -1,7 +1,11 @@
 package client;
 
 import model.AuthData;
+import model.GameData;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -13,6 +17,7 @@ public class ChessClient {
     private State state = State.LOGGED_OUT;
     private final ServerFacade server;
     private String authToken;
+    private List<GameData> games = new ArrayList<>();
 
     public ChessClient(String url) throws ResponseException{
         server = new ServerFacade(url);
@@ -75,10 +80,10 @@ public class ChessClient {
             return help();
         }
         else if (command.equals("create")){
-            return "temp create";
+            return create(params);
         }
         else if (command.equals("list")){
-            return "temp list";
+            return list();
         }
         else if (command.equals("join")){
             return "temp join";
@@ -130,6 +135,50 @@ public class ChessClient {
                 return "Wrong username or password.\n";
             }
             return "Unable to log in user. Please try again.\n";
+        }
+    }
+
+    private String create(String... params) throws ResponseException{
+        if (params.length != 1){
+            return "Please enter the following: <NAME>\n";
+        }
+        try{
+            server.createGame(authToken, params[0]);
+            return String.format("""
+                    Created game '%s'.
+                    Use 'list' to see all games available.
+                    Use 'join' to join a game.
+                    """, params[0]);
+        }
+        catch (ResponseException e){
+            return "Unable to create game. Please try again.\n";
+        }
+    }
+
+    private String checkPlayerName(String userName){
+        if (userName == null){
+            return "empty";
+        }
+        else{
+            return userName;
+        }
+    }
+
+    private String list() throws ResponseException{
+        try {
+            games = server.listGames(authToken);
+            if (games.isEmpty()){
+                return "There are no games created. Use 'create' to make a new game\n";
+            }
+            StringBuilder gamesList = new StringBuilder();
+            for (int i = 0; i < games.size(); i++){
+                GameData game = games.get(i);
+                gamesList.append(String.format("%d. GAME: %s  WHITE: %s  BLACK: %s\n", i+1, game.gameName(), checkPlayerName(game.whiteUsername()), checkPlayerName(game.blackUsername())));
+            }
+            return gamesList.toString();
+        }
+        catch (ResponseException e){
+            return "Unable to list game(s). Please try again.\n";
         }
     }
 
