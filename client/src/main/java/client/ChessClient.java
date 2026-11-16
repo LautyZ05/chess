@@ -2,7 +2,7 @@ package client;
 
 import model.AuthData;
 import model.GameData;
-
+import chess.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +32,7 @@ public class ChessClient {
             String userInput = scanned.nextLine();
             result = evaluateUserInput(userInput);
             if (result.equals("quit")){
-                System.out.print("Exiting program. Come again!");
+                System.out.print("Exiting program. Come again!\n");
             }
             else {
                 System.out.print(result);
@@ -52,7 +52,7 @@ public class ChessClient {
                 return evaluateLoggedIn(command, params);
             }
         }
-        catch (ResponseException e){
+        catch (Exception e){
             return "Something went wrong, please try again.";
         }
     }
@@ -114,7 +114,7 @@ public class ChessClient {
         }
         catch (ResponseException e){
             if (e.status() == 403){
-                return "Username is already take, try another.\n";
+                return "Username is already taken, try another.\n";
             }
             return "Unable to register user. Please try again.\n";
         }
@@ -186,6 +186,7 @@ public class ChessClient {
         int number;
         try{
             number = Integer.parseInt(gameNum);
+            games = server.listGames(authToken);
             if (number < 1 || number > games.size()){
                 return null;
             }
@@ -198,7 +199,7 @@ public class ChessClient {
 
     private String join(String... params) throws ResponseException{
         if (params.length != 2){
-            return "Please enter the following: <NUMBER> <WHITE|BLACK>\n";
+            return "Please enter the following: <ID> <WHITE|BLACK>\n";
         }
         String color = params[1].toUpperCase();
         if (!color.equals("WHITE") && !color.equals("BLACK")){
@@ -206,14 +207,14 @@ public class ChessClient {
         }
         GameData game = findGame(params[0]);
         if (game == null){
-            return "That game number doesn't exist. Use 'list' to see games.\n";
+            return "That game ID doesn't exist. Use 'list' to see games.\n";
         }
         try{
             server.joinGame(authToken, color, game.gameID());
-            return "Joined '" + game.gameName() + "' as '" + color + "'.\n";
+            return "Joined '" + game.gameName() + "' as '" + color + "'.\n" + BoardBuilder.printBoard(new ChessGame().getBoard(), color.equals("WHITE"));
         }
         catch (ResponseException e){
-            if (e.status == 403){
+            if (e.status() == 403){
                 return "That color is already taken.\n";
             }
             return "Unable to join game. Please try again.\n";
@@ -222,13 +223,13 @@ public class ChessClient {
 
     private String observe(String... params) throws ResponseException{
         if (params.length != 1){
-            return "Please enter the following: <NUMBER>\n.";
+            return "Please enter the following: <ID>\n.";
         }
         GameData game = findGame(params[0]);
         if (game == null){
-            return "That game number doesn't exist. Use 'list' to see games.\n";
+            return "That game ID doesn't exist. Use 'list' to see games.\n";
         }
-        return "Observing '" + game.gameName() + "'.\n";
+        return "Observing '" + game.gameName() + "'.\n" + BoardBuilder.printBoard(new ChessGame().getBoard(), true);
     }
 
     private String logout() throws ResponseException{
