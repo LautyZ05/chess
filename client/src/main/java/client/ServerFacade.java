@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
-    String URL;
+    String url;
     HttpClient client = HttpClient.newHttpClient();
     private record CreateGameResult(int gameID) {}
     private record ListGamesResult(List<GameData> games) {}
 
-    public ServerFacade(String url){
-        URL = url;
+    public ServerFacade(String inputedUrl){
+        url = inputedUrl;
     }
 
     public AuthData register(String username, String password, String email) throws ResponseException{
@@ -64,7 +64,7 @@ public class ServerFacade {
     }
 
     private HttpResponse<String> sendRequest(String action, String path, String body, String authToken) throws ResponseException{
-        var request = HttpRequest.newBuilder(URI.create(URL + path))
+        var request = HttpRequest.newBuilder(URI.create(url + path))
                 .method(action, requestBody(body));
         if (body != null) {
             request.header("Content-Type", "application/json");

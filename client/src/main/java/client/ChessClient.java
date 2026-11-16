@@ -24,7 +24,8 @@ public class ChessClient {
     }
 
     public void run(){
-        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + "♕ Welcome to the 240 Chess! Type " + SET_TEXT_COLOR_GREEN + "'Help'" + SET_TEXT_COLOR_WHITE + " to get started! ♕" + RESET_TEXT_BOLD_FAINT + RESET_TEXT_COLOR);
+        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + "♕ Welcome to the 240 Chess! Type " + SET_TEXT_COLOR_GREEN +
+                "'Help'" + SET_TEXT_COLOR_WHITE + " to get started! ♕" + RESET_TEXT_BOLD_FAINT + RESET_TEXT_COLOR);
         Scanner scanned = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")){
@@ -173,7 +174,8 @@ public class ChessClient {
             StringBuilder gamesList = new StringBuilder();
             for (int i = 0; i < games.size(); i++){
                 GameData game = games.get(i);
-                gamesList.append(String.format("%d. GAME: %s  WHITE: %s  BLACK: %s\n", i+1, game.gameName(), checkPlayerName(game.whiteUsername()), checkPlayerName(game.blackUsername())));
+                gamesList.append(String.format("%d. GAME: %s  WHITE: %s  BLACK: %s\n", i+1, game.gameName(),
+                        checkPlayerName(game.whiteUsername()), checkPlayerName(game.blackUsername())));
             }
             return gamesList.toString();
         }
@@ -211,7 +213,8 @@ public class ChessClient {
         }
         try{
             server.joinGame(authToken, color, game.gameID());
-            return "Joined '" + game.gameName() + "' as '" + color + "'.\n" + BoardBuilder.printBoard(new ChessGame().getBoard(), color.equals("WHITE"));
+            return "Joined '" + game.gameName() + "' as '" + color + "'.\n" +
+                    BoardBuilder.printBoard(new ChessGame().getBoard(), color.equals("WHITE"));
         }
         catch (ResponseException e){
             if (e.status() == 403){

@@ -16,7 +16,8 @@ public class BoardBuilder {
             else {
                 row = 1 + i;
             }
-            boardData.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE).append(" ").append(row).append(" ").append(RESET_BG_COLOR + RESET_TEXT_COLOR);
+            boardData.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE).append(" ")
+                    .append(row).append(" ").append(RESET_BG_COLOR + RESET_TEXT_COLOR);
             for (int j = 0; j < 8; j++){
                 int col;
                 if (whitePerspective){
@@ -28,7 +29,8 @@ public class BoardBuilder {
                 ChessPiece piece = board.getPiece(new ChessPosition(row, col));
                 boardData.append(chessPattern(row, col)).append(getChessPiece(piece)).append(RESET_BG_COLOR + RESET_TEXT_COLOR);
             }
-            boardData.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE).append(" ").append(row).append(" ").append(RESET_BG_COLOR + RESET_TEXT_COLOR).append("\n");
+            boardData.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE).append(" ").append(row)
+                    .append(" ").append(RESET_BG_COLOR + RESET_TEXT_COLOR).append("\n");
         }
         boardData.append(letterRow(whitePerspective));
         return boardData.toString();
