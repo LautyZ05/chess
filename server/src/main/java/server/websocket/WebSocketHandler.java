@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.*;
@@ -7,6 +8,8 @@ import model.*;
 import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler{
@@ -31,7 +34,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var session = ctx.session;
         try{
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            if (command == null || command.getCommandType() == null){
+            if (command == null || command.getCommandType() == null || command.getGameID() == null){
                 sendError(session, "Error: invalid command");
                 return;
             }
@@ -60,7 +63,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(Session session, AuthData auth, GameData game){
+        connections.add(game.gameID(), session, auth.username());
+        connections.send(session, new LoadGameMessage(game.game()));
 
+        ChessGame.TeamColor color = colorOf(auth.username(), game);
+        String text = color == null ? auth.username() + " is observing the game" : auth.username() + " joined the game as " + color.toString().toLowerCase();
+        connections.broadcastToOthers(game.gameID(), session, new NotificationMessage(text));
+
+    }
+
+    private ChessGame.TeamColor colorOf(String username, GameData game){
+        if (username.equals(game.whiteUsername())){
+            return ChessGame.TeamColor.WHITE;
+        }
+        if (username.equals(game.blackUsername())){
+            return ChessGame.TeamColor.BLACK;
+        }
+        else{
+            return null;
+        }
     }
 
     private void sendError(Session session, String message){
