@@ -1,7 +1,6 @@
 package server.websocket;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
